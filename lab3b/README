@@ -1,0 +1,17 @@
+### DELIVERABLES
+The submission tarball contains 3 files:
+
+1. Makefile
+    It has 3 targets:
+    'default' is used to create a symbolic link to lab3b.py.
+    'dist' is used to create a submission tarball.
+    'clean' is to used to remove all the files created by Makefile.
+    
+2. README
+    This file.
+
+3. lab3b.py
+    A python script that does the consistency check for an input csv file
+    as specified in the assignment specification. It assumes input csv files
+    to have a correct format.
+    Also, it uses python 3.8.2, found at /usr/local/cs/bin/python3.

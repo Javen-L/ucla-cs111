@@ -1,0 +1,39 @@
+1. lab0.c
+This is a source file for the program. It has a simple functionality,
+namely to copy the content of stdin to stdout. In addition to that, you could
+use options to cause a segmentation fault and to catch the segmentation fault.
+The basic usage is as follows:
+usage: ./lab0 [OPTIONS...] 	
+--input=filename    use the specified file as standard input 
+--output=filename   use the specified file as standard output 
+--segfault          force a segmentation fault 
+--catch             use signal(2) to register a SIGSEGV handler
+
+2. Makefile
+This makefile is to build the program, to make a submission tarball,
+and to perform a smoke testing. It has following targets:
+
+lab0:	to build an executable from lab0.c (this is the default target)
+clean:	to clean up the working directory, it remove lab0 and lab0-405118629.tar.gz
+dist:	to make a submission tarball
+check:	to perform a sanity check by using 9 sub-targets check1, ..., check9 
+check1:	to test functionality of '--input -> --output'
+check2:	to test functionality of '--input -> stdout'
+check3: to test functionality of 'stdin -> stdout'
+check4: to test functionality of 'stdin -> --output'
+check5: to test functionality of handling a missing argument for --input option
+check6: to test functionality of handling an invalid option
+check7: to test functionality of handling an invalid input file
+check8: to test functionality of handling an invalid output file
+check9: to test functionality of handling --segfault and --catch options
+
+---
+The following links are of the websites I read to learn APIs and concepts used in lab0.c:
+
+getopt(3) ... https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Options.html
+strerror(3) ... http://man7.org/linux/man-pages/man3/strerror.3.html
+gdb(1) ... https://www.geeksforgeeks.org/gdb-step-by-step-introduction/
+open(2) .. http://man7.org/linux/man-pages/man2/open.2.html
+dup(2) ... http://man7.org/linux/man-pages/man2/dup.2.html
+errno(3) ... http://man7.org/linux/man-pages/man3/errno.3.html
+makefile ... https://www.gnu.org/software/make/manual/html_node/Introduction.html

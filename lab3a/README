@@ -1,0 +1,28 @@
+### DELIVERABLES
+The submission tarball contains the required 4 files:
+
+1. Makefile
+    It has 3 targets:
+    'default' is used to build executable lab3a from lab3a.c.
+    'dist' is used to create a submission tarball.
+    'clean' is to used to remove all the files created by Makefile.
+    
+2. README
+    This file.
+
+3. lab3a.c
+    A source code for the program. In lab3a.c, main() is a wrapper
+    function that calls other functions to write summary on stdout
+    of superblock, group discriptor, free block entries, free inode
+    entries, and inode. Each function is named in a selfexplanatory way.
+    Note: read_inode_table() write inode summary on stdout as well as
+    directory entries and indirect block references. To produce
+    directory entries and indirect block references, recursive fundtions
+    are used.
+
+4. ext2_fs
+    A provided header file.
+
+### REFERENCES
+http://man7.org/linux/man-pages/man2/pwrite.2.html
+https://pubs.opengroup.org/onlinepubs/007908799/xsh/time.h.html

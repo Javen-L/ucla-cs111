@@ -1,0 +1,29 @@
+1. lab1a.c
+This is a source file of the program. The program is as specified in the spec;
+it accepts an optional option --shell without an argument. If '--shell' is
+not used, the program reads a single character at a time from stdin and writes 
+it on stdout. The program can be terminated by pressing ^D.
+If '--shell' is used, it creates a child process in which a shell runs.
+The user can use normal shell commands on this child shell and the output of
+the child shell is shown in the stdout of the parent's process.
+The user can terminate the child shell by typing ^C. By typing ^D, the user
+can shutdown the whole program.
+
+2. Makefile
+It has three targets: default, clean, and dist. The default target builds
+an executable 'lab1a' form the source code. 'Clean' will clean up the current
+directly, i.e. deletes all the files created by Makefile (lab1a and
+lab1a-405118629.tar.gz). Finally, 'dist' creates a tarball for submission.
+
+Reference:
+I learned APIs used in this assignment from the following websites:
+termious(3): http://man7.org/linux/man-pages/man3/termios.3.html
+tcsetattr(3): https://pubs.opengroup.org/onlinepubs/009695399/functions/tcsetattr.html
+tcgetattr(3): https://pubs.opengroup.org/onlinepubs/009695399/functions/tcgetattr.html
+fork(2): http://man7.org/linux/man-pages/man2/fork.2.html
+exec(3): http://man7.org/linux/man-pages/man3/exec.3.html 
+pipe(2): http://man7.org/linux/man-pages/man2/pipe.2.html,
+         https://www.geeksforgeeks.org/pipe-system-call/
+poll(2): http://man7.org/linux/man-pages/man2/poll.2.html
+kill(2): http://man7.org/linux/man-pages/man2/kill.2.html
+waitpid(2): https://pubs.opengroup.org/onlinepubs/9699919799/functions/wait.html

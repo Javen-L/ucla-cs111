@@ -1,0 +1,512 @@
+Total: 838 samples
+     696  83.1%  83.1%      838 100.0% thread_routine
+      27   3.2%  86.3%       27   3.2% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:165
+      24   2.9%  89.1%       24   2.9% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:200
+      20   2.4%  91.5%       80   9.5% SortedList_lookup
+      16   1.9%  93.4%       16   1.9% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:1721
+      10   1.2%  94.6%       62   7.4% SortedList_insert
+       8   1.0%  95.6%        8   1.0% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:1720
+       8   1.0%  96.5%        8   1.0% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:1730
+       6   0.7%  97.3%        6   0.7% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:204
+       5   0.6%  97.9%        5   0.6% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:1729
+       4   0.5%  98.3%        4   0.5% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:160
+       3   0.4%  98.7%        3   0.4% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:203
+       3   0.4%  99.0%        3   0.4% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:205
+       3   0.4%  99.4%        3   0.4% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:1714
+       2   0.2%  99.6%        2   0.2% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:130
+       2   0.2%  99.9%        2   0.2% ?? /usr/src/debug////////glibc-2.17-c758a686/string/../sysdeps/x86_64/multiarch/strcmp-sse42.S:202
+       1   0.1% 100.0%        1   0.1% _init
+       0   0.0% 100.0%      838 100.0% ?? /usr/src/debug////////glibc-2.17-c758a686/misc/../sysdeps/unix/sysv/linux/x86_64/clone.S:111
+       0   0.0% 100.0%      838 100.0% start_thread
+ROUTINE ====================== thread_routine in /u/cs/ugrad/sonoyama/cs111/lab2b/lab2_list.c
+   696    838 Total samples (flat / cumulative)
+     .      .  183: void error(char* call){
+     .      .  184:     fprintf(stderr, "call to '%s' failed: %s\n", call, strerror(errno));
+     .      .  185:     exit(1);
+     .      .  186: }
+     .      .  187: 
+---
+     .      .  188: void *thread_routine(int *idx){
+     .      .  189:     struct timespec start, end;
+     .      .  190:     int ret;
+     .      .  191:     int head_idx;
+     .      .  192:     int i;
+     .      .  193: 
+     .      .  194:     //printf("%d: from %d to %d\n",(int)pthread_self(), *idx, *idx+num_iter);
+     .      .  195: 
+     .      .  196:     // NO SYNC
+     .      .  197:     if (opt_sync==0) {
+     .      .  198: 
+     .      .  199:         // INSERT
+     .      .  200:         for (i=0; i<num_iter; i++){
+     .      .  201:             //printf("inserting %s into list%d\n",elements[*idx+i].key,head_idx);
+     .      .  202:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  203:             SortedList_insert(&heads[head_idx], &elements[*idx+i]);
+     .      .  204:         }
+     .      .  205: 
+     .      .  206:         // LENGTH
+     .      .  207:         int total_len=0;
+     .      .  208:         for (i=0; i<num_list; i++){
+     .      .  209:             ret = SortedList_length(&heads[i]);
+     .      .  210:             if (ret==-1){
+     .      .  211:                 fprintf(stderr, "SortedList_length failed: list currupted\n");
+     .      .  212:                 exit(2);
+     .      .  213:             }
+     .      .  214:             total_len += ret;
+     .      .  215:             //printf("list%d length = %d\n", i, ret);
+     .      .  216:         }
+     .      .  217:     
+     .      .  218:         // LOOK UP, DELETE
+     .      .  219:         for (i=0; i<num_iter; i++){
+     .      .  220:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  221:             //printf("look list%d for %s\n", head_idx, elements[*idx+i].key);
+     .      .  222:             SortedListElement_t *del_temp = SortedList_lookup(&heads[head_idx], (const char*) elements[*idx+i].key);
+     .      .  223:             if (del_temp==NULL){
+     .      .  224:                 fprintf(stderr, "SortedList_lookup failed: previously inserted key not in the list\n");
+     .      .  225:                 exit(2);
+     .      .  226:             }
+     .      .  227:             ret = SortedList_delete(del_temp);
+     .      .  228:             if (ret){
+     .      .  229:                 fprintf(stderr, "SortedList_delete failed: list currupted\n");
+     .      .  230:                 exit(2);
+     .      .  231:             }
+     .      .  232:         }
+     .      .  233:     }
+     .      .  234:     // SPIN-LOCK
+     .      .  235:     else if (opt_sync==1){
+     .      .  236:         long long lock_time=0;
+     .      .  237: 
+     .      .  238:         // INSERT
+     .      .  239:         for (i=0; i<num_iter; i++){
+     .      .  240:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  241: 
+     .      .  242:             // Lock
+     .      .  243:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  244:             if (ret<0)
+     .      .  245:                 error("clock_gettime");
+   391    391  246:             while(__sync_lock_test_and_set(&lock_s[head_idx], 1));
+     .      .  247:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  248:             if (ret<0)
+     .      .  249:                 error("clock_gettime");
+     .      .  250:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  251: 
+     .      .  252:             // Insert
+     .     62  253:             SortedList_insert(&heads[head_idx], &elements[*idx+i]);
+     .      .  254: 
+     .      .  255:             // Unlock
+     .      .  256:             __sync_lock_release(&lock_s[head_idx]);
+     .      .  257:         }
+     .      .  258: 
+     .      .  259:         // LENGTH
+     .      .  260:         int total_len=0;
+     .      .  261:         for (i=0; i<num_list; i++){
+     .      .  262:             // Lock
+     .      .  263:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  264:             if (ret<0)
+     .      .  265:                 error("clock_gettime");
+     .      .  266:             while(__sync_lock_test_and_set(&lock_s[i], 1));
+     .      .  267:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  268:             if (ret<0)
+     .      .  269:                 error("clock_gettime");
+     .      .  270:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  271: 
+     .      .  272:             // Get length
+     .      .  273:             ret = SortedList_length(&heads[i]);
+     .      .  274:             if (ret==-1){
+     .      .  275:                 fprintf(stderr, "SortedList_length failed: list currupted\n");
+     .      .  276:                 exit(2);
+     .      .  277:             }
+     .      .  278:             total_len += ret;
+     .      .  279: 
+     .      .  280:             // Unlock
+     .      .  281:             __sync_lock_release(&lock_s[i]);
+     .      .  282:         }
+     .      .  283: 
+     .      .  284:         // LOOK UP, DELETE
+     .      .  285:         for (i=0; i<num_iter; i++){
+     .      .  286:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  287: 
+     .      .  288:             // Lock
+     .      .  289:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  290:             if (ret<0)
+     .      .  291:                 error("clock_gettime");
+   305    305  292:             while(__sync_lock_test_and_set(&lock_s[head_idx], 1));
+     .      .  293:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  294:             if (ret<0)
+     .      .  295:                 error("clock_gettime");
+     .      .  296:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  297: 
+     .      .  298:             // Look up
+     .     80  299:             SortedListElement_t *del_temp = SortedList_lookup(&heads[head_idx], (const char*) elements[*idx+i].key);
+     .      .  300:             if (del_temp==NULL){
+     .      .  301:                 fprintf(stderr, "SortedList_lookup failed: previously inserted key not in the list\n");
+     .      .  302:                 exit(2);
+     .      .  303:             }
+     .      .  304: 
+     .      .  305:             // Delete
+     .      .  306:             ret = SortedList_delete(del_temp);
+     .      .  307:             if (ret){
+     .      .  308:                 fprintf(stderr, "SortedList_delete failed: list currupted\n");
+     .      .  309:                 exit(2);
+     .      .  310:             }
+     .      .  311: 
+     .      .  312:             // Unlock
+     .      .  313:             __sync_lock_release(&lock_s[head_idx]);
+     .      .  314:         }
+     .      .  315:         total_lock_time += lock_time;
+     .      .  316:     }
+     .      .  317:     // MUTEX
+     .      .  318:     else if (opt_sync==2){
+     .      .  319:         long long lock_time=0;
+     .      .  320: 
+     .      .  321:         // INSERT
+     .      .  322:         for (i=0; i<num_iter; i++){
+     .      .  323:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  324: 
+     .      .  325:             // Lock
+     .      .  326:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  327:             if (ret<0)
+     .      .  328:                 error("clock_gettime");
+     .      .  329:             ret = pthread_mutex_lock(&lock_m[head_idx]);
+     .      .  330:             if (ret!=0)
+     .      .  331:                 error("pthread_mutex_lock");
+     .      .  332:             //printf("insert: list%d is locked\n",head_idx);
+     .      .  333:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  334:             if (ret<0)
+     .      .  335:                 error("clock_gettime");
+     .      .  336:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  337: 
+     .      .  338:             // Insert
+     .      .  339:             //printf("inserting %s into list%d ... ",elements[*idx+i].key,head_idx);
+     .      .  340:             SortedList_insert(&heads[head_idx], &elements[*idx+i]);
+     .      .  341:             //printf("done\n");
+     .      .  342: 
+     .      .  343:             // Unlock
+     .      .  344:             ret = pthread_mutex_unlock(&lock_m[head_idx]);
+     .      .  345:             if (ret!=0)
+     .      .  346:                 error("pthread_mutex_unlock");
+     .      .  347:             //printf("insert: list%d is unlocked\n",head_idx);
+     .      .  348:         }
+     .      .  349: 
+     .      .  350:         // LENGTH
+     .      .  351:         int total_len=0;
+     .      .  352:         for (i=0; i<num_list; i++){
+     .      .  353:             // Lock
+     .      .  354:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  355:             if (ret<0)
+     .      .  356:                 error("clock_gettime");
+     .      .  357:             ret = pthread_mutex_lock(&lock_m[i]);
+     .      .  358:             if (ret!=0)
+     .      .  359:                 error("pthread_mutex_lock");
+     .      .  360:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  361:             if (ret<0)
+     .      .  362:                 error("clock_gettime");
+     .      .  363:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  364: 
+     .      .  365:             // Get length
+     .      .  366:             ret = SortedList_length(&heads[i]);
+     .      .  367:             if (ret==-1){
+     .      .  368:                 fprintf(stderr, "SortedList_length failed: list currupted\n");
+     .      .  369:                 exit(2);
+     .      .  370:             }
+     .      .  371:             total_len += ret;
+     .      .  372:             //printf("list%d length = %d\n",i, ret);
+     .      .  373: 
+     .      .  374:             // Unlock
+     .      .  375:             ret = pthread_mutex_unlock(&lock_m[i]);
+     .      .  376:             if (ret!=0)
+     .      .  377:                 error("pthread_mutex_unlock");
+     .      .  378: 
+     .      .  379:         }
+     .      .  380: 
+     .      .  381:         // LOOK UP, DELETE
+     .      .  382:         for (i=0; i<num_iter; i++){
+     .      .  383:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  384: 
+     .      .  385:             // Lock
+     .      .  386:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  387:             if (ret<0)
+     .      .  388:                 error("clock_gettime");
+     .      .  389:             ret = pthread_mutex_lock(&lock_m[head_idx]);
+     .      .  390:             if (ret!=0)
+     .      .  391:                 error("pthread_mutex_lock");
+     .      .  392:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  393:             if (ret<0)
+     .      .  394:                 error("clock_gettime");
+     .      .  395:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  396: 
+     .      .  397:             // Look up
+     .      .  398:             SortedListElement_t *del_temp = SortedList_lookup(&heads[head_idx], (const char*) elements[*idx+i].key);
+     .      .  399:             if (del_temp==NULL){
+     .      .  400:                 fprintf(stderr, "SortedList_lookup failed: previously inserted key not in the list\n");
+     .      .  401:                 exit(2);
+     .      .  402:             }
+     .      .  403: 
+     .      .  404:             // Delete
+     .      .  405:             ret = SortedList_delete(del_temp);
+     .      .  406:             if (ret){
+     .      .  407:                 fprintf(stderr, "SortedList_delete failed: list currupted\n");
+     .      .  408:                 exit(2);
+     .      .  409:             }
+     .      .  410: 
+     .      .  411:             // Unlock
+     .      .  412:             ret = pthread_mutex_unlock(&lock_m[head_idx]);
+     .      .  413:             if (ret!=0)
+     .      .  414:                 error("pthread_mutex_unlock");
+     .      .  415:         }
+     .      .  416:         total_lock_time += lock_time;
+     .      .  417:     }
+     .      .  418: 
+     .      .  419:     pthread_exit(NULL);
+---
+     .      .  420: }
+     .      .  421: 
+     .      .  422: 
+     .      .  423: void create_elements(){
+     .      .  424:     int size = num_t*num_iter;
+ROUTINE ====================== thread_routine in /u/cs/ugrad/sonoyama/cs111/lab2b/lab2_list.c
+   696    838 Total samples (flat / cumulative)
+     .      .  183: void error(char* call){
+     .      .  184:     fprintf(stderr, "call to '%s' failed: %s\n", call, strerror(errno));
+     .      .  185:     exit(1);
+     .      .  186: }
+     .      .  187: 
+---
+     .      .  188: void *thread_routine(int *idx){
+     .      .  189:     struct timespec start, end;
+     .      .  190:     int ret;
+     .      .  191:     int head_idx;
+     .      .  192:     int i;
+     .      .  193: 
+     .      .  194:     //printf("%d: from %d to %d\n",(int)pthread_self(), *idx, *idx+num_iter);
+     .      .  195: 
+     .      .  196:     // NO SYNC
+     .      .  197:     if (opt_sync==0) {
+     .      .  198: 
+     .      .  199:         // INSERT
+     .      .  200:         for (i=0; i<num_iter; i++){
+     .      .  201:             //printf("inserting %s into list%d\n",elements[*idx+i].key,head_idx);
+     .      .  202:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  203:             SortedList_insert(&heads[head_idx], &elements[*idx+i]);
+     .      .  204:         }
+     .      .  205: 
+     .      .  206:         // LENGTH
+     .      .  207:         int total_len=0;
+     .      .  208:         for (i=0; i<num_list; i++){
+     .      .  209:             ret = SortedList_length(&heads[i]);
+     .      .  210:             if (ret==-1){
+     .      .  211:                 fprintf(stderr, "SortedList_length failed: list currupted\n");
+     .      .  212:                 exit(2);
+     .      .  213:             }
+     .      .  214:             total_len += ret;
+     .      .  215:             //printf("list%d length = %d\n", i, ret);
+     .      .  216:         }
+     .      .  217:     
+     .      .  218:         // LOOK UP, DELETE
+     .      .  219:         for (i=0; i<num_iter; i++){
+     .      .  220:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  221:             //printf("look list%d for %s\n", head_idx, elements[*idx+i].key);
+     .      .  222:             SortedListElement_t *del_temp = SortedList_lookup(&heads[head_idx], (const char*) elements[*idx+i].key);
+     .      .  223:             if (del_temp==NULL){
+     .      .  224:                 fprintf(stderr, "SortedList_lookup failed: previously inserted key not in the list\n");
+     .      .  225:                 exit(2);
+     .      .  226:             }
+     .      .  227:             ret = SortedList_delete(del_temp);
+     .      .  228:             if (ret){
+     .      .  229:                 fprintf(stderr, "SortedList_delete failed: list currupted\n");
+     .      .  230:                 exit(2);
+     .      .  231:             }
+     .      .  232:         }
+     .      .  233:     }
+     .      .  234:     // SPIN-LOCK
+     .      .  235:     else if (opt_sync==1){
+     .      .  236:         long long lock_time=0;
+     .      .  237: 
+     .      .  238:         // INSERT
+     .      .  239:         for (i=0; i<num_iter; i++){
+     .      .  240:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  241: 
+     .      .  242:             // Lock
+     .      .  243:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  244:             if (ret<0)
+     .      .  245:                 error("clock_gettime");
+   391    391  246:             while(__sync_lock_test_and_set(&lock_s[head_idx], 1));
+     .      .  247:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  248:             if (ret<0)
+     .      .  249:                 error("clock_gettime");
+     .      .  250:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  251: 
+     .      .  252:             // Insert
+     .     62  253:             SortedList_insert(&heads[head_idx], &elements[*idx+i]);
+     .      .  254: 
+     .      .  255:             // Unlock
+     .      .  256:             __sync_lock_release(&lock_s[head_idx]);
+     .      .  257:         }
+     .      .  258: 
+     .      .  259:         // LENGTH
+     .      .  260:         int total_len=0;
+     .      .  261:         for (i=0; i<num_list; i++){
+     .      .  262:             // Lock
+     .      .  263:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  264:             if (ret<0)
+     .      .  265:                 error("clock_gettime");
+     .      .  266:             while(__sync_lock_test_and_set(&lock_s[i], 1));
+     .      .  267:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  268:             if (ret<0)
+     .      .  269:                 error("clock_gettime");
+     .      .  270:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  271: 
+     .      .  272:             // Get length
+     .      .  273:             ret = SortedList_length(&heads[i]);
+     .      .  274:             if (ret==-1){
+     .      .  275:                 fprintf(stderr, "SortedList_length failed: list currupted\n");
+     .      .  276:                 exit(2);
+     .      .  277:             }
+     .      .  278:             total_len += ret;
+     .      .  279: 
+     .      .  280:             // Unlock
+     .      .  281:             __sync_lock_release(&lock_s[i]);
+     .      .  282:         }
+     .      .  283: 
+     .      .  284:         // LOOK UP, DELETE
+     .      .  285:         for (i=0; i<num_iter; i++){
+     .      .  286:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  287: 
+     .      .  288:             // Lock
+     .      .  289:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  290:             if (ret<0)
+     .      .  291:                 error("clock_gettime");
+   305    305  292:             while(__sync_lock_test_and_set(&lock_s[head_idx], 1));
+     .      .  293:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  294:             if (ret<0)
+     .      .  295:                 error("clock_gettime");
+     .      .  296:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  297: 
+     .      .  298:             // Look up
+     .     80  299:             SortedListElement_t *del_temp = SortedList_lookup(&heads[head_idx], (const char*) elements[*idx+i].key);
+     .      .  300:             if (del_temp==NULL){
+     .      .  301:                 fprintf(stderr, "SortedList_lookup failed: previously inserted key not in the list\n");
+     .      .  302:                 exit(2);
+     .      .  303:             }
+     .      .  304: 
+     .      .  305:             // Delete
+     .      .  306:             ret = SortedList_delete(del_temp);
+     .      .  307:             if (ret){
+     .      .  308:                 fprintf(stderr, "SortedList_delete failed: list currupted\n");
+     .      .  309:                 exit(2);
+     .      .  310:             }
+     .      .  311: 
+     .      .  312:             // Unlock
+     .      .  313:             __sync_lock_release(&lock_s[head_idx]);
+     .      .  314:         }
+     .      .  315:         total_lock_time += lock_time;
+     .      .  316:     }
+     .      .  317:     // MUTEX
+     .      .  318:     else if (opt_sync==2){
+     .      .  319:         long long lock_time=0;
+     .      .  320: 
+     .      .  321:         // INSERT
+     .      .  322:         for (i=0; i<num_iter; i++){
+     .      .  323:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  324: 
+     .      .  325:             // Lock
+     .      .  326:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  327:             if (ret<0)
+     .      .  328:                 error("clock_gettime");
+     .      .  329:             ret = pthread_mutex_lock(&lock_m[head_idx]);
+     .      .  330:             if (ret!=0)
+     .      .  331:                 error("pthread_mutex_lock");
+     .      .  332:             //printf("insert: list%d is locked\n",head_idx);
+     .      .  333:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  334:             if (ret<0)
+     .      .  335:                 error("clock_gettime");
+     .      .  336:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  337: 
+     .      .  338:             // Insert
+     .      .  339:             //printf("inserting %s into list%d ... ",elements[*idx+i].key,head_idx);
+     .      .  340:             SortedList_insert(&heads[head_idx], &elements[*idx+i]);
+     .      .  341:             //printf("done\n");
+     .      .  342: 
+     .      .  343:             // Unlock
+     .      .  344:             ret = pthread_mutex_unlock(&lock_m[head_idx]);
+     .      .  345:             if (ret!=0)
+     .      .  346:                 error("pthread_mutex_unlock");
+     .      .  347:             //printf("insert: list%d is unlocked\n",head_idx);
+     .      .  348:         }
+     .      .  349: 
+     .      .  350:         // LENGTH
+     .      .  351:         int total_len=0;
+     .      .  352:         for (i=0; i<num_list; i++){
+     .      .  353:             // Lock
+     .      .  354:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  355:             if (ret<0)
+     .      .  356:                 error("clock_gettime");
+     .      .  357:             ret = pthread_mutex_lock(&lock_m[i]);
+     .      .  358:             if (ret!=0)
+     .      .  359:                 error("pthread_mutex_lock");
+     .      .  360:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  361:             if (ret<0)
+     .      .  362:                 error("clock_gettime");
+     .      .  363:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  364: 
+     .      .  365:             // Get length
+     .      .  366:             ret = SortedList_length(&heads[i]);
+     .      .  367:             if (ret==-1){
+     .      .  368:                 fprintf(stderr, "SortedList_length failed: list currupted\n");
+     .      .  369:                 exit(2);
+     .      .  370:             }
+     .      .  371:             total_len += ret;
+     .      .  372:             //printf("list%d length = %d\n",i, ret);
+     .      .  373: 
+     .      .  374:             // Unlock
+     .      .  375:             ret = pthread_mutex_unlock(&lock_m[i]);
+     .      .  376:             if (ret!=0)
+     .      .  377:                 error("pthread_mutex_unlock");
+     .      .  378: 
+     .      .  379:         }
+     .      .  380: 
+     .      .  381:         // LOOK UP, DELETE
+     .      .  382:         for (i=0; i<num_iter; i++){
+     .      .  383:             head_idx = (int) elements[*idx+i].key[0] % num_list;
+     .      .  384: 
+     .      .  385:             // Lock
+     .      .  386:             ret = clock_gettime(CLOCK_MONOTONIC, &start);
+     .      .  387:             if (ret<0)
+     .      .  388:                 error("clock_gettime");
+     .      .  389:             ret = pthread_mutex_lock(&lock_m[head_idx]);
+     .      .  390:             if (ret!=0)
+     .      .  391:                 error("pthread_mutex_lock");
+     .      .  392:             ret = clock_gettime(CLOCK_MONOTONIC, &end);
+     .      .  393:             if (ret<0)
+     .      .  394:                 error("clock_gettime");
+     .      .  395:             lock_time += (end.tv_sec-start.tv_sec)*1000000000 + (end.tv_nsec-start.tv_nsec);
+     .      .  396: 
+     .      .  397:             // Look up
+     .      .  398:             SortedListElement_t *del_temp = SortedList_lookup(&heads[head_idx], (const char*) elements[*idx+i].key);
+     .      .  399:             if (del_temp==NULL){
+     .      .  400:                 fprintf(stderr, "SortedList_lookup failed: previously inserted key not in the list\n");
+     .      .  401:                 exit(2);
+     .      .  402:             }
+     .      .  403: 
+     .      .  404:             // Delete
+     .      .  405:             ret = SortedList_delete(del_temp);
+     .      .  406:             if (ret){
+     .      .  407:                 fprintf(stderr, "SortedList_delete failed: list currupted\n");
+     .      .  408:                 exit(2);
+     .      .  409:             }
+     .      .  410: 
+     .      .  411:             // Unlock
+     .      .  412:             ret = pthread_mutex_unlock(&lock_m[head_idx]);
+     .      .  413:             if (ret!=0)
+     .      .  414:                 error("pthread_mutex_unlock");
+     .      .  415:         }
+     .      .  416:         total_lock_time += lock_time;
+     .      .  417:     }
+     .      .  418: 
+     .      .  419:     pthread_exit(NULL);
+---
+     .      .  420: }
+     .      .  421: 
+     .      .  422: 
+     .      .  423: void create_elements(){
+     .      .  424:     int size = num_t*num_iter;

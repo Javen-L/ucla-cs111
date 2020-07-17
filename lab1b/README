@@ -1,0 +1,44 @@
+1. lab1b-client.c
+This is a source code of the client program. It reads stdin and sends the input data
+(one charactor at a time) to the server via socket(2). '--port=port#' option is mandaroty,
+if not given, the program prints an error message to stderr and exit with code 1.
+'--log=filename' option requires an argument, which is a filename to keep log of data
+sent/received between client and server. Finally, it has '--compress' option to compress/decompresses
+data sent/recieved between client and server.
+
+2. lab1b-server.c
+This is a source code of the server program. It reads input from a socke connected to a
+client. It then sends the input data to its child process which runs a shell, and receives
+output from the shell. Finally it sends the data received from the shell back to the client
+via socket. Server program requires '--port=port#' option. If port number is not given, the
+program prints an error message to stderr and exits with code 1. It also has an optional 
+option '--compress,' which compresses/decompresses the data send/received from the client.
+
+3. Makefile
+It has 5 targets: lab1b(default), client, server, clean, and dist. The default target builds
+executables 'lab1b-client' and 'lab1b-server' form corresponding source codes. 'Clean' will clean up the current
+directly, i.e. deletes all the files created by Makefile (lab1b-405118629.tar.gz, lab1b-client, lab1b-server).
+Finally, 'dist' creates a tarball 'lab1b-405118629.tar.gz' for submission.
+
+
+Reference:
+I studied APIs used in this project from the following websites:
+socket(2):
+http://man7.org/linux/man-pages/man2/socket.2.html
+http://www.linuxhowtos.org/C_C++/socket.htm
+connect(2):
+http://man7.org/linux/man-pages/man2/connect.2.html
+bind(2):
+http://man7.org/linux/man-pages/man2/bind.2.html
+listen(2):
+http://man7.org/linux/man-pages/man2/listen.2.html
+accept(2):
+http://man7.org/linux/man-pages/man2/accept.2.html
+socketaddr_in:
+https://www.gta.ufrj.br/ensino/eel878/sockets/sockaddr_inman.html
+
+To implement def/inf functions, I read throught the tutorial given in the spec
+and modified the sample code (zpipe.c) so that def/inf takes two "buffers" instead of files.
+To do so, I removed the outer loop from each function and changed arguemnt types accordingly.
+Thus, def/inf functions have basically the same functionality as what's given in the tutorial.
+https://www.zlib.net/manual.html#Constants
